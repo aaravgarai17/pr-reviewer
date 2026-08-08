@@ -1,0 +1,33 @@
+# Example .reviewbot.yml
+#
+# Drop this in the root of any repository the bot reviews. Every field is
+# optional; the defaults below are what you get without a file at all.
+#
+# Read from the *head* of each pull request, so a PR that changes this file is
+# reviewed under its new settings.
+
+# Set false to switch the bot off for this repository without uninstalling it.
+enabled: true
+
+# Minimum severity worth posting: critical | major | minor | nit
+# Start at "major" on a busy repo — you can always lower it once the team
+# trusts the bot's judgement.
+severity_threshold: minor
+
+# Hard ceiling on comments per pull request. Clamped by the server's own limit.
+# The most severe findings survive the cap.
+max_comments: 10
+
+# Extra paths to skip. These are *added* to the built-in list (lockfiles,
+# minified bundles, vendored dependencies, generated protobufs).
+ignore_paths:
+  - "migrations/*"
+  - "*.pb.go"
+  - "docs/generated/*"
+
+# Free-text steer passed to the model. Useful when a repo has a specific
+# recurring concern.
+# focus: "SQL injection and missing authorization checks"
+
+# Post a summary comment even when nothing was found.
+post_summary: true

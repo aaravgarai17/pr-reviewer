@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+.DS_Store
+
+# Credentials — never commit these
+.env
+*.pem
+
+# Coverage artifacts
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml

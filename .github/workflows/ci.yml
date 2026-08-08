@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Tests & coverage
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # No credentials needed: GitHub and Claude are stubbed at their
+      # interfaces, so the entire pipeline is exercised offline.
+      - name: Run tests with coverage
+        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=80 -q
+
+  demo:
+    name: End-to-end demo runs offline
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Proves the README's central claim — that the whole review pipeline
+      # works without API keys — on every push.
+      - name: Run the demo
+        run: |
+          output=$(python demo.py)
+          echo "$output"
+          echo "$output" | grep -q "critical" || { echo "no findings produced"; exit 1; }
+          echo "$output" | grep -q "dropped: duplicates" || { echo "filter stats missing"; exit 1; }
+
+  security:
+    name: No secrets committed
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # A bot that handles API keys should demonstrate it doesn't leak them.
+      - name: Check for committed credentials
+        run: |
+          if [ -f .env ]; then
+            echo ".env is committed — it must be gitignored"; exit 1
+          fi
+          if git grep -nE '(sk-ant-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{30,})' -- ':!*.md' ':!demo.py'; then
+            echo "possible credential found in source"; exit 1
+          fi
+          echo "no credentials in source"
+
+  lint:
+    name: App imports cleanly
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Catches import errors and syntax problems that tests might not reach.
+      - name: Import the FastAPI app
+        run: python -c "from app.main import app; print(f'{len(app.routes)} routes registered')"
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t pr-reviewer .
