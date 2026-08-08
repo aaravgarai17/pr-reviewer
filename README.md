@@ -133,6 +133,38 @@ This bot posts using `line` + `side` because it's far less error-prone, but
 computes `position` too — the legacy endpoint needs it, and the two together
 make the distinction impossible to fudge.
 
+### How large a PR can it actually review?
+
+Measured, not theorised — `python -m bench.diff_ceiling` runs the real pipeline
+against synthetic diffs at increasing sizes.
+
+**The binding constraint is per-file, not per-PR.**
+
+| Single file | Requests | Result |
+| ----------- | -------- | ------ |
+| 1,000 changed lines | 4 | complete |
+| **1,400 changed lines** | 4 | **complete — largest that works** |
+| 1,500 changed lines | 0 | **file skipped entirely** |
+
+| Whole PR | Files | Requests | Cost | Result |
+| -------- | ----- | -------- | ---- | ------ |
+| 4,000 lines | 10 | 20 | $0.58 | complete |
+| 20,000 lines | 50 | 100 | $2.89 | complete |
+| 40,000 lines | 100 | 200 | $5.78 | complete |
+| **80,000 lines** | 200 | 400 | $11.57 | **complete — no ceiling found** |
+
+A 40,000-line pull request spread across 100 files reviews fine. A 2,000-line
+change to *one* file does not — that file is skipped, and the bot posts a
+review of a PR it only partly read.
+
+**This has nothing to do with the model's context window.** It is
+`MAX_FILE_LINES` (1,500) and the 12,000-token per-request budget, both
+configurable. A single hunk exceeding the budget is skipped rather than
+truncated, because showing the model half a function invites confident nonsense
+about the half it cannot see.
+
+Cost scales linearly at roughly **$0.014 per 100 changed lines**.
+
 ### 2. Fitting a pull request into a context window
 
 A 5,000-line PR doesn't fit. Even where it would, a single failed call
