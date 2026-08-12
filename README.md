@@ -17,6 +17,9 @@ from leaving forty comments nobody will read.
 
 ## Try it without any API keys
 
+> **Common tasks:** `make help` lists everything — `make install`, `make test`,
+> `make verify`, and per-project shortcuts.
+
 ```bash
 pip install -r requirements.txt
 python demo.py
