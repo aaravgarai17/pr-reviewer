@@ -1,10 +1,10 @@
-fastapi==0.141.1
-uvicorn[standard]==0.52.4
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
 httpx==0.28.1
 anthropic==0.34.2
-pydantic==2.13.5
-pydantic-settings==2.15.0
-python-dotenv==1.2.3
+pydantic==2.14.2
+pydantic-settings==2.16.2
+python-dotenv==1.2.4
 PyYAML==6.0.3
 pytest==8.2.2
 pytest-cov==7.1.0
