@@ -308,7 +308,7 @@ to Haiku (~5× cheaper, noticeably blunter).
 ## Tests
 
 ```bash
-pytest -q                                    # 161 tests
+pytest -q                                    # 162 tests
 pytest --cov=app --cov-report=term-missing   # 91%
 ```
 
@@ -358,7 +358,7 @@ pr-reviewer/
 │   ├── config.py      # server settings + .reviewbot.yml
 │   ├── models.py
 │   └── main.py        # FastAPI webhook receiver
-├── tests/             # 161 tests, no keys or network needed
+├── tests/             # 162 tests, no keys or network needed
 ├── demo.py            # full pipeline offline, with output
 ├── verify.sh          # 12 checks proving this README
 ├── .reviewbot.yml     # example repo config
